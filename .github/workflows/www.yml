@@ -1,0 +1,80 @@
+name: Website
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: site-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  NETLIFY_SITE_ID: f7094795-d898-4229-b957-807ab6f0d7d4
+  ALIAS_NON_PRODUCTION: ${{ github.sha }}
+  SITE_URL_PRODUCTION: https://secondbraintrust.com
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comment (in progress)
+        if: "!(github.ref == 'refs/heads/main' && github.event_name == 'push')"
+        uses: edumserrano/find-create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- workflow: www -->"
+          comment-author: "github-actions[bot]"
+          body: |
+            <!-- workflow: www -->
+            > **Warning**
+            > :construction: Preview build is in progress; we'll update this comment once it's ready to view.
+          edit-mode: replace
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # Make sure the actual branch is checked out when running on pull requests
+          ref: ${{ github.head_ref }}
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Publish (non-production)
+        if: "!(github.ref == 'refs/heads/main' && github.event_name == 'push')"
+        run: npm exec -- netlify deploy --alias "$ALIAS_NON_PRODUCTION" --dir .
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+      - name: Publish (production)
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: npm exec -- netlify deploy --prod --dir .
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+      - name: Comment (ready)
+        if: "!(github.ref == 'refs/heads/main' && github.event_name == 'push')"
+        uses: edumserrano/find-create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- workflow: www -->"
+          comment-author: "github-actions[bot]"
+          body: |
+            <!-- workflow: www -->
+            > **Note**
+            > :white_check_mark: Build complete, available to view at [the `${{ github.sha }}` alias](https://${{ github.sha }}--sbt.netlify.app/).
+          edit-mode: replace

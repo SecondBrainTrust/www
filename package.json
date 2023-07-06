@@ -1,0 +1,23 @@
+{
+  "name": "@lukecarrier/second-brain-trust",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Landing page for the Second Brain Trust community",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukeCarrier/second-brain-trust.git"
+  },
+  "author": "Luke Carrier <luke@carrier.im>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/LukeCarrier/second-brain-trust/issues"
+  },
+  "homepage": "https://github.com/LukeCarrier/second-brain-trust#readme",
+  "devDependencies": {
+    "netlify-cli": "^15.8.1"
+  }
+}
