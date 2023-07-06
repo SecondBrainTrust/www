@@ -56,13 +56,13 @@ jobs:
 
       - name: Publish (non-production)
         if: "!(github.ref == 'refs/heads/main' && github.event_name == 'push')"
-        run: npm exec -- netlify deploy --alias "$ALIAS_NON_PRODUCTION" --dir .
+        run: npm exec -- netlify deploy --alias "$ALIAS_NON_PRODUCTION" --dir src
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
       - name: Publish (production)
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: npm exec -- netlify deploy --prod --dir .
+        run: npm exec -- netlify deploy --prod --dir src
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
